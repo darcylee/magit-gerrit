@@ -5,7 +5,7 @@ Magit plugin for Gerrit Code Review
 
 
 Installation
-============
+------------
 
 If you have a recent Emacs with `package.el`, you can install `magit-gerrit`
 from [MELPA](http://melpa.milkbox.net/).
@@ -28,7 +28,7 @@ Then:
 
 
 Workflow
-============
+--------
 
 1. Check out branch, make changes, and commit...
 2. Gerrit Push Commit for Code Review => R P
@@ -38,7 +38,7 @@ Workflow
 
 
 Magit Gerrit Configuration
-============
+--------------------------
 
 For simple setups, it should be enough to set the default value for 
 `magit-gerrit-ssh-creds` and `magit-gerrit-remote` as shown above.
@@ -56,13 +56,13 @@ variables.
 ```
 
 Author
-============
+------
 
 Brian Fransioli  ( assem@terranpro.org )
 
 
 Acknowledgements
-============
+----------------
 
 Thanks for using and improving magit-gerrit!  Enjoy!
 
