@@ -95,6 +95,11 @@
   :group 'magit-gerrit
   :type 'key-sequence)
 
+(defcustom magit-gerrit-signed-push-p nil
+  "Whether or not to push with the --signed option."
+  :group 'magit-gerrit
+  :type 'boolean)
+
 (defun gerrit-command (cmd &rest args)
   (let ((gcmd (concat
 	       "-x -p 29418 "
@@ -465,7 +470,7 @@ Succeed even if branch already exist
 		(string= branch-remote "."))
 	(setq branch-remote magit-gerrit-remote))
 
-      (magit-run-git-async "push" "-v" branch-remote
+      (magit-run-git-async "push" "-v" (when magit-gerrit-signed-push-p "--signed") branch-remote
 			   (concat rev ":" branch-pub)))))
 
 (defun magit-gerrit-create-review ()
