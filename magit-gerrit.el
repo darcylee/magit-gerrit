@@ -1,10 +1,10 @@
-;;; magit-gerrit.el --- Magit plugin for Gerrit Code Review
+;;; magit-gerrit.el --- Magit plugin for Gerrit Code Review  -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) 2013 Brian Fransioli
 ;;
 ;; Author: Brian Fransioli <assem@terranpro.org>
 ;; URL: https://github.com/terranpro/magit-gerrit
-;; Package-Requires: ((magit "2.3.1"))
+;; Package-Requires: ((emacs "25.1") (magit "2.3.1"))
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -21,7 +21,7 @@
 
 ;;; Commentary:
 ;;
-;; Magit plugin to make Gerrit code review easy-to-use from emacs and
+;; Magit plugin to make Gerrit code review easy-to-use from Emacs and
 ;; without the need for a browser!
 ;;
 ;; Currently uses the [deprecated] gerrit ssh interface, which has
@@ -77,13 +77,6 @@
 (eval-when-compile
   (require 'cl-lib))
 
-;; Define a defvar-local macro for Emacs < 24.3
-(unless (fboundp 'defvar-local)
-  (defmacro defvar-local (var val &optional docstring)
-    `(progn
-       (defvar ,var ,val ,docstring)
-       (make-variable-buffer-local ',var))))
-
 (defvar-local magit-gerrit-ssh-creds nil
   "Credentials used to execute gerrit commands via ssh of the form ID@Server")
 
@@ -91,7 +84,7 @@
   "Default remote name to use for gerrit (e.g. \"origin\", \"gerrit\")")
 
 (defcustom magit-gerrit-popup-prefix "R"
-  "Key code to open magit-gerrit popup"
+  "Key code to open magit-gerrit popup."
   :group 'magit-gerrit
   :type 'key-sequence)
 
@@ -159,9 +152,8 @@
 
 (defun magit-gerrit-string-real-length (s)
   (if (multibyte-string-p s)
-      (progn
-        (setq mm (- (string-bytes s) (length s)))
-        (setq n (- (length s) (/ mm 2)))
+      (let* ((mm (- (string-bytes s) (length s)))
+             (n (- (length s) (/ mm 2))))
         (+ mm n))
     (length s)))
 
@@ -184,8 +176,7 @@ Succeed even if branch already exist
 
 
 (defun magit-gerrit-pretty-print-reviewer (name email crdone vrdone)
-  (let* ((wid (1- (window-width)))
-	 (crstr (propertize (if crdone (format "%+2d" (string-to-number crdone)) "  ")
+  (let* ((crstr (propertize (if crdone (format "%+2d" (string-to-number crdone)) "  ")
 			    'face '(magit-diff-lines-heading
 				    bold)))
 	 (vrstr (propertize (if vrdone (format "%+2d" (string-to-number vrdone)) "  ")
@@ -221,8 +212,7 @@ Succeed even if branch already exist
                        'magit-signature-bad
                      'magit-signature-good))))
     (format "%s%s%s%s\n"
-            numstr patchsetstr subjstr author))
-  )
+            numstr patchsetstr subjstr author)))
 
 (defun magit-gerrit-wash-approval (approval)
   (let* ((approver (cdr-safe (assoc 'by approval)))
@@ -250,9 +240,9 @@ Succeed even if branch already exist
 	 (subj (cdr-safe (assoc 'subject jobj)))
 	 (owner (cdr-safe (assoc 'owner jobj)))
 	 (owner-name (cdr-safe (assoc 'name owner)))
-	 (owner-email (cdr-safe (assoc 'email owner)))
+	 ;; (owner-email (cdr-safe (assoc 'email owner)))
 	 (patchsets (cdr-safe (assoc 'currentPatchSet jobj)))
-     (patchset-num (cdr-safe (assoc 'number patchsets)))
+         (patchset-num (cdr-safe (assoc 'number patchsets)))
 	 ;; compare w/t since when false the value is => :json-false
 	 (isdraft (eq (cdr-safe (assoc 'isDraft patchsets)) t))
 	 (approvs (cdr-safe (if (listp patchsets)
@@ -271,10 +261,10 @@ Succeed even if branch already exist
 	(add-text-properties beg (point) (list 'magit-gerrit-jobj jobj)))
       t)))
 
-(defun magit-gerrit-wash-reviews (&rest args)
+(defun magit-gerrit-wash-reviews (&rest _args)
   (magit-wash-sequence #'magit-gerrit-wash-review))
 
-(defun magit-gerrit-section (section title washer &rest args)
+(defun magit-gerrit-section (_section title washer &rest args)
   (let ((magit-git-executable "ssh")
 	(magit-git-global-arguments nil))
     (magit-insert-section (section title)
@@ -282,7 +272,7 @@ Succeed even if branch already exist
       (magit-git-wash washer (split-string (car args)))
       (insert "\n"))))
 
-(defun magit-gerrit-remote-update (&optional remote)
+(defun magit-gerrit-remote-update (&optional _remote)
   nil)
 
 (defun magit-gerrit-review-at-point ()
@@ -298,7 +288,7 @@ Succeed even if branch already exist
   (let ((jobj (magit-gerrit-review-at-point)))
     (when jobj
       (let ((ref (cdr (assoc 'ref (assoc 'currentPatchSet jobj)))))
-        (let* ((magit-proc (magit-git-fetch magit-gerrit-remote ref)))
+        (let* ((_magit-proc (magit-git-fetch magit-gerrit-remote ref)))
           (message (format "Waiting a git fetch from %s to complete..."
                            magit-gerrit-remote))
           (magit-gerrit-process-wait))))))
@@ -382,7 +372,7 @@ Succeed even if branch already exist
 (defun magit-gerrit-arguments ()
   (transient-args 'magit-gerrit-dispatch))
 
-(defun magit-gerrit-popup-args (&optional something)
+(defun magit-gerrit-popup-args (&optional _something)
   (or (magit-gerrit-arguments) (list "")))
 
 (defun magit-gerrit-verify-review (args)
@@ -484,9 +474,7 @@ Succeed even if branch already exist
 (defun magit-gerrit-publish-draft ()
   (interactive)
   (let ((prj (magit-gerrit-get-project))
-	(id (cdr-safe (assoc 'id
-		     (magit-gerrit-review-at-point))))
-	(rev (cdr-safe (assoc
+        (rev (cdr-safe (assoc
 			'revision
 			(cdr-safe (assoc 'currentPatchSet
 					 (magit-gerrit-review-at-point)))))))
@@ -496,9 +484,7 @@ Succeed even if branch already exist
 (defun magit-gerrit-delete-draft ()
   (interactive)
   (let ((prj (magit-gerrit-get-project))
-	(id (cdr-safe (assoc 'id
-		     (magit-gerrit-review-at-point))))
-	(rev (cdr-safe (assoc
+        (rev (cdr-safe (assoc
 			'revision
 			(cdr-safe (assoc 'currentPatchSet
 					 (magit-gerrit-review-at-point)))))))
@@ -508,8 +494,7 @@ Succeed even if branch already exist
 (defun magit-gerrit-abandon-review ()
   (interactive)
   (let ((prj (magit-gerrit-get-project))
-	(id (cdr-safe (assoc 'id
-		     (magit-gerrit-review-at-point))))
+	;; (id (cdr-safe (assoc 'id (magit-gerrit-review-at-point))))
 	(rev (cdr-safe (assoc
 			'revision
 			(cdr-safe (assoc 'currentPatchSet
@@ -518,7 +503,7 @@ Succeed even if branch already exist
     (gerrit-review-abandon prj rev)
     (magit-refresh)))
 
-(defun magit-gerrit-read-comment (&rest args)
+(defun magit-gerrit-read-comment (&rest _args)
   (format "\'\"%s\"\'"
 	  (read-from-minibuffer "Message: ")))
 
@@ -530,7 +515,7 @@ Succeed even if branch already exist
   :reader 'magit-gerrit-read-comment
   )
 
-(defun magit-gerrit-create-branch (branch parent))
+(defun magit-gerrit-create-branch (_branch _parent))
 
 ;;;###autoload (autoload 'magit-gerrit-dispatch "magit-gerrit" nil t)
 (define-transient-command magit-gerrit-dispatch ()
