@@ -24,6 +24,10 @@ Then:
 
 ;; if necessary, use an alternative remote instead of 'origin'
 (setq-default magit-gerrit-remote "gerrit")  
+
+;; if your remote contains too much reviews, itcan become slow,
+;; and you can choose to fetch only your watched reviews.
+(setq-default magit-gerrit-extra-options "is:watched is:owner")
 ```
 
 

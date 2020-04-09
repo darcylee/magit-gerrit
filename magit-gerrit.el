@@ -93,6 +93,11 @@
   :group 'magit-gerrit
   :type 'boolean)
 
+(defcustom magit-gerrit-extra-options nil
+  "Extra options defined when fetching reviews"
+  :group 'magit-gerrit
+  :type 'string)
+
 (defun gerrit-command (cmd &rest args)
   (let ((gcmd (concat
 	       "-x -p 29418 "
@@ -113,6 +118,7 @@
 		  "--comments"
 		  "--current-patch-set"
 		  (concat "project:" prj)
+		  (concat magit-gerrit-extra-options)
 		  (concat "status:" (or status "open"))))
 
 (defun gerrit-review ())
