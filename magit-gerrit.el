@@ -212,12 +212,12 @@ Succeed even if branch already exist
   (let ((fieldlist nil)
         (namestr (propertize (or name "") 'face 'magit-refname))
         (emailstr (propertize (if email (concat "(" email ")") "")
-                              'face 'change-log-name)))
+                              'face 'change-log-name))
+        (hliteseq (cons '(magit-diff-lines-heading bold)
+                        (make-list (- (length scorelist) 1) '(magit-diff-added-highlight bold)))))
 
-    (setq fieldlist (cl-adjoin (magit-gerrit-format-reviewer-score (car scorelist) '(magit-diff-lines-heading bold)) fieldlist))
-
-    (dolist (score (cdr scorelist))
-      (setq fieldlist (cl-adjoin (magit-gerrit-format-reviewer-score score '(magit-diff-added-highlight bold)) fieldlist)))
+    (dolist (score scorelist)
+      (setq fieldlist (cl-adjoin (magit-gerrit-format-reviewer-score score (pop hliteseq)) fieldlist)))
 
     (format (magit-gerrit-get-review-line-format-string (length fieldlist))
             (string-join (nreverse fieldlist) " ")
