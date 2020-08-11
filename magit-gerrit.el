@@ -251,6 +251,13 @@ Succeed even if branch already exist
     (format "%s%s%s%s\n"
             numstr patchsetstr subjstr author)))
 
+(defun magit-gerrit-match-review-labels (score type)
+  "Match SCORE to correct TYPE."
+  (let ((matchlist nil))
+    (dolist (labeltuple magit-gerrit-review-labels matchlist)
+            (push (and (string= type (car labeltuple)) score) matchlist))
+    (nreverse matchlist)))
+
 (defun magit-gerrit-wash-approval (approval)
   (let* ((approver (cdr-safe (assoc 'by approval)))
          (approvname (cdr-safe (assoc 'name approver)))
