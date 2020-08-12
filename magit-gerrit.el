@@ -83,6 +83,19 @@
 (defvar-local magit-gerrit-remote "origin"
   "Default remote name to use for gerrit (e.g. \"origin\", \"gerrit\")")
 
+(defcustom magit-gerrit-show-review-labels nil
+  "If t show Gerrit Review Labels as 1st row."
+  :group 'magit-gerrit
+  :type 'boolean)
+
+(defconst magit-gerrit-default-review-labels
+  (list (list "Code-Review" "CR") (list "Verified" "Ve")))
+
+(defcustom magit-gerrit-review-labels magit-gerrit-default-review-labels
+  "List of review lables including user defined."
+  :group 'magit-gerrit
+  :type 'list)
+
 (defcustom magit-gerrit-popup-prefix "R"
   "Key code to open magit-gerrit popup."
   :group 'magit-gerrit
@@ -270,11 +283,20 @@ Succeed even if branch already exist
 (defun magit-gerrit-wash-reviews (&rest _args)
   (magit-wash-sequence #'magit-gerrit-wash-review))
 
+(defun magit-gerrit-create-review-labels ()
+  "Create review labels heading."
+  (let* ((pad " ")
+         (review-labels pad))
+    (dolist (label-tuple magit-gerrit-review-labels review-labels)
+      (setq review-labels (concat review-labels " " (car (cdr label-tuple)))))))
+
 (defun magit-gerrit-section (_section title washer &rest args)
   (let ((magit-git-executable "ssh")
         (magit-git-global-arguments nil))
     (magit-insert-section (section title)
       (magit-insert-heading title)
+      (if magit-gerrit-show-review-labels
+          (insert (concat (magit-gerrit-create-review-labels) "\n")))
       (magit-git-wash washer (split-string (car args)))
       (insert "\n"))))
 
