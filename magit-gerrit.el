@@ -194,17 +194,22 @@ Succeed even if branch already exist
          (magit-run-git "checkout" "-B" branch parent))))
 
 
-(defun magit-gerrit-pretty-print-reviewer (name email crdone vrdone)
-  (let* ((crstr (propertize (if crdone (format "%+2d" (string-to-number crdone)) "  ")
-                            'face '(magit-diff-lines-heading
-                                    bold)))
-         (vrstr (propertize (if vrdone (format "%+2d" (string-to-number vrdone)) "  ")
-                            'face '(magit-diff-added-highlight
-                                    bold)))
-         (namestr (propertize (or name "") 'face 'magit-refname))
-         (emailstr (propertize (if email (concat "(" email ")") "")
-                               'face 'change-log-name)))
-    (format "  %-5s      %s %s" (concat crstr " " vrstr) namestr emailstr)))
+(defun magit-gerrit-format-reviewer-score (score hl)
+  (propertize (if score (format "%+2d" (string-to-number score)) "  ")
+              'face hl))
+
+(defun magit-gerrit-pretty-print-reviewer (name email &rest scorelist)
+  (let ((fieldlist nil)
+        (namestr (propertize (or name "") 'face 'magit-refname))
+        (emailstr (propertize (if email (concat "(" email ")") "")
+                              'face 'change-log-name)))
+
+    (setq fieldlist (cl-adjoin (magit-gerrit-format-reviewer-score (car scorelist) '(magit-diff-lines-heading bold)) fieldlist))
+
+    (dolist (score (cdr scorelist))
+      (setq fieldlist (cl-adjoin (magit-gerrit-format-reviewer-score score '(magit-diff-added-highlight bold)) fieldlist)))
+
+    (format "  %-5s      %s %s" (string-join (nreverse fieldlist) " ") namestr emailstr)))
 
 (defun magit-gerrit-pretty-print-review (num patchsetn subj owner-name &optional draft)
   ;; window-width - two prevents long line arrow from being shown
