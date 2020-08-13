@@ -92,7 +92,7 @@
   (list (list "Code-Review" "CR") (list "Verified" "Ve")))
 
 (defcustom magit-gerrit-review-labels magit-gerrit-default-review-labels
-  "List of review lables including user defined."
+  "List of review labels including possible user defined."
   :group 'magit-gerrit
   :type 'list)
 
@@ -255,7 +255,7 @@ Succeed even if branch already exist
   "Match SCORE to correct TYPE."
   (let ((matchlist nil))
     (dolist (labeltuple magit-gerrit-review-labels matchlist)
-            (push (and (string= type (car labeltuple)) score) matchlist))
+      (push (and (string= type (car labeltuple)) score) matchlist))
     (nreverse matchlist)))
 
 (defun magit-gerrit-wash-approval (approval)
@@ -263,14 +263,12 @@ Succeed even if branch already exist
          (approvname (cdr-safe (assoc 'name approver)))
          (approvemail (cdr-safe (assoc 'email approver)))
          (type (cdr-safe (assoc 'type approval)))
-         (verified (string= type "Verified"))
-         (codereview (string= type "Code-Review"))
-         (score (cdr-safe (assoc 'value approval))))
+         (score (cdr-safe (assoc 'value approval)))
+         (paramlist (append (list approvname approvemail)
+                            (magit-gerrit-match-review-labels score type))))
 
     (magit-insert-section (section approval)
-      (insert (magit-gerrit-pretty-print-reviewer approvname approvemail
-                                                  (and codereview score)
-                                                  (and verified score))
+      (insert (apply 'magit-gerrit-pretty-print-reviewer paramlist)
               "\n"))))
 
 (defun magit-gerrit-wash-approvals (approvals)
