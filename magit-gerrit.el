@@ -193,12 +193,22 @@ Succeed even if branch already exist
          (magit-save-repository-buffers)
          (magit-run-git "checkout" "-B" branch parent))))
 
+(defun magit-gerrit-get-length-of-score-area (numitems)
+  "Get length of score area from NUMITEMS as a string."
+  (number-to-string
+   (+ 2 (* 3 (- numitems 1)))))
+
+(defun magit-gerrit-get-review-line-format-string (numitems)
+  "Construct format control string based on NUMITEMS."
+  (concat "  %-" (magit-gerrit-get-length-of-score-area numitems) "s      %s %s"))
 
 (defun magit-gerrit-format-reviewer-score (score hl)
+  "Format reviewer score column if SCORE is t and apply highlight HL always."
   (propertize (if score (format "%+2d" (string-to-number score)) "  ")
               'face hl))
 
 (defun magit-gerrit-pretty-print-reviewer (name email &rest scorelist)
+  "Print reviewer line using NAME, EMAIL and scores from SCORELIST."
   (let ((fieldlist nil)
         (namestr (propertize (or name "") 'face 'magit-refname))
         (emailstr (propertize (if email (concat "(" email ")") "")
@@ -209,7 +219,10 @@ Succeed even if branch already exist
     (dolist (score (cdr scorelist))
       (setq fieldlist (cl-adjoin (magit-gerrit-format-reviewer-score score '(magit-diff-added-highlight bold)) fieldlist)))
 
-    (format "  %-5s      %s %s" (string-join (nreverse fieldlist) " ") namestr emailstr)))
+    (format (magit-gerrit-get-review-line-format-string (length fieldlist))
+            (string-join (nreverse fieldlist) " ")
+            namestr
+            emailstr)))
 
 (defun magit-gerrit-pretty-print-review (num patchsetn subj owner-name &optional draft)
   ;; window-width - two prevents long line arrow from being shown
