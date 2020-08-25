@@ -28,6 +28,16 @@ Then:
 ;; if your remote contains too much reviews, itcan become slow,
 ;; and you can choose to fetch only your watched reviews.
 (setq-default magit-gerrit-extra-options "is:watched is:owner")
+
+;; display review label header, off by default
+(setq-default magit-gerrit-show-review-labels t)
+
+;; if your project uses custom labels you can enable them
+;; by adding custom labels to to the list, syntax is
+;; (add-to-list (list "Review-label-fullname-as-displayed-in-Gerrit-UI"
+;;                    "2-char-abbreviation-for-header") t)
+(add-to-list 'magit-gerrit-review-labels (list "Zuul-Gate" "ZG") t)
+(add-to-list 'magit-gerrit-review-labels (list "StaticAnalysis" "SA") t)
 ```
 
 
