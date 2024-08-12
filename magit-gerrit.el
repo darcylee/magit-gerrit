@@ -137,8 +137,6 @@
 (defun gerrit-query (prj &optional status)
   (gerrit-command "query"
                   "--format=JSON"
-                  "--all-approvals"
-                  "--comments"
                   "--current-patch-set"
                   (concat "project:" prj)
                   (concat magit-gerrit-extra-options)
