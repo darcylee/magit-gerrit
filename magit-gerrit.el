@@ -669,7 +669,7 @@ Succeed even if branch already exist
     (magit-refresh)))
 
 (defun magit-gerrit-read-comment (&rest _args)
-  (format "\'\"%s\"\'"
+  (format "\'%s\'"
           (read-from-minibuffer "Message: ")))
 
 (transient-define-argument magit-gerrit-message:--message ()
