@@ -116,6 +116,17 @@
   :group 'magit-gerrit
   :type 'string)
 
+(defcustom magit-gerrit-collapse-patchset-section nil
+  "Collapse/hide gerrit section containing patchsets by default.
+Collapse/hide the section body containing the list of gerrit
+changesets by default when t. This only has an effect when
+creating the section for the first time. When the section is
+recreated during a refresh, then the visibility of predecessor is
+inherited and this setting is ignored. See also the HIDE
+parameter of `magit-insert-section'."
+  :group 'magit-gerrit
+  :type 'boolean)
+
 (defcustom magit-gerrit-ellipsis ".."
   "String ellipsis"
   :group 'magit-gerrit
@@ -432,7 +443,7 @@ Succeed even if branch already exist
   (let ((magit-git-executable "ssh")
         (magit-remote-git-executable "ssh")
         (magit-git-global-arguments nil))
-    (magit-insert-section (section title)
+    (magit-insert-section (section title magit-gerrit-collapse-patchset-section)
       (magit-insert-heading title)
       (insert (magit-gerrit-pretty-print-review-header))
       (magit-git-wash washer (split-string (car args)))
