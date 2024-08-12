@@ -496,9 +496,10 @@ Succeed even if branch already exist
     (if jobj
         (with-temp-buffer
           (insert
-           (concat (cdr (assoc 'url jobj))
-                   (if with-commit-message
-                       (concat " " (car (split-string (cdr (assoc 'commitMessage jobj)) "\n" t))))))
+           (concat (if with-commit-message
+                       (concat (format "%s: " (cdr-safe (assoc 'number jobj)))
+                               (car (split-string (cdr (assoc 'commitMessage jobj)) "\n" t)) " | "))
+                   (cdr (assoc 'url jobj))))
           (message "%s" (buffer-string))
           (clipboard-kill-region (point-min) (point-max))))))
 
