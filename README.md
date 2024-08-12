@@ -23,11 +23,15 @@ Then:
 (setq-default magit-gerrit-ssh-creds "myid@gerrithost.org")
 
 ;; if necessary, use an alternative remote instead of 'origin'
-(setq-default magit-gerrit-remote "gerrit")  
+(setq-default magit-gerrit-remote "gerrit")
 
 ;; if your remote contains too much reviews, itcan become slow,
 ;; and you can choose to fetch only your watched reviews.
 (setq-default magit-gerrit-extra-options "is:watched is:owner")
+
+;; if you have separate servers for push and pull access
+;; you can select push URL by setting magit-gerrit-use-push-url
+(setq-default magit-gerrit-use-push-url t)
 
 ;; display review label header, off by default
 (setq-default magit-gerrit-show-review-labels t)
@@ -54,7 +58,7 @@ Workflow
 Magit Gerrit Configuration
 --------------------------
 
-For simple setups, it should be enough to set the default value for 
+For simple setups, it should be enough to set the default value for
 `magit-gerrit-ssh-creds` and `magit-gerrit-remote` as shown above.
 
 For per project configurations, consider using buffer local or directory local

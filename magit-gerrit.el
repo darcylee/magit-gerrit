@@ -83,6 +83,11 @@
 (defvar-local magit-gerrit-remote "origin"
   "Default remote name to use for gerrit (e.g. \"origin\", \"gerrit\")")
 
+(defcustom magit-gerrit-use-push-url nil
+  "If t use push url from 'git remote' for Gerrit connection."
+  :group 'magit-gerrit
+  :type 'boolean)
+
 (defcustom magit-gerrit-show-review-labels nil
   "If t show Gerrit Review Labels as 1st row."
   :group 'magit-gerrit
@@ -161,8 +166,15 @@
   (gerrit-ssh-cmd "review" "--project" prj "--verified" score
                   (if msg msg "") rev))
 
+(defun magit-gerrit-select-remote-url-cmd ()
+  "Returns git command to be used to resolve remote URL."
+  (if magit-gerrit-use-push-url
+      (list "remote" "get-url" "--push")
+    (list "ls-remote" "--get-url")))
+
 (defun magit-gerrit-get-remote-url ()
-  (magit-git-string "ls-remote" "--get-url" magit-gerrit-remote))
+  "Returns remote URL."
+  (magit-git-string (magit-gerrit-select-remote-url-cmd) magit-gerrit-remote))
 
 (defun magit-gerrit-get-project ()
   (let* ((regx (rx (zero-or-one ?:) (zero-or-more (any digit)) ?/
