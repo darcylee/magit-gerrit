@@ -83,6 +83,9 @@
 (defvar-local magit-gerrit-remote "origin"
   "Default remote name to use for gerrit (e.g. \"origin\", \"gerrit\")")
 
+(defvar-local magit-gerrit-force-enable nil
+  "Force enabling `magit-gerrit' for the project.")
+
 (defcustom magit-gerrit-use-push-url nil
   "If t use push url from 'git remote' for Gerrit connection."
   :group 'magit-gerrit
@@ -771,10 +774,11 @@ default Gerrit SSH port."
   (defvar magit-origin-action nil)
   (let ((remote-url (magit-gerrit-get-remote-url)))
     (when (and remote-url
-               (or magit-gerrit-ssh-creds
-                   (magit-gerrit-detect-ssh-creds remote-url))
-               (string-match magit-gerrit-ssh-creds remote-url))
-      (magit-gerrit-mode t))
+               (or magit-gerrit-force-enable
+                   (and (or magit-gerrit-ssh-creds
+                            (magit-gerrit-detect-ssh-creds remote-url))
+                        (string-match magit-gerrit-ssh-creds remote-url))))
+      (magit-gerrit-mode 1))
     (if (not magit-origin-action)
         (setf magit-origin-action
               (lookup-key magit-mode-map magit-gerrit-popup-prefix)))
