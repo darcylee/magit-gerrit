@@ -86,6 +86,9 @@
 (defvar-local magit-gerrit-force-enable nil
   "Force enabling `magit-gerrit' for the project.")
 
+(defvar-local magit-gerrit-port 29418
+  "The default port to use with the Gerrit host.")
+
 (defcustom magit-gerrit-use-push-url nil
   "If t use push url from 'git remote' for Gerrit connection."
   :group 'magit-gerrit
@@ -137,7 +140,9 @@ parameter of `magit-insert-section'."
 
 (defun gerrit-command (cmd &rest args)
   (let ((gcmd (concat
-               "-x -p 29418 "
+               "-x -p "
+               (number-to-string magit-gerrit-port)
+               " "
                (or magit-gerrit-ssh-creds
                    (error "`magit-gerrit-ssh-creds' must be set!"))
                " "
@@ -764,7 +769,7 @@ Assumes REMOTE-URL is a Gerrit repo if scheme is SSH and port is the
 default Gerrit SSH port."
   (let ((url (url-generic-parse-url remote-url)))
     (when (and (string= "ssh" (url-type url))
-               (eq 29418 (url-port url)))
+               (eq magit-gerrit-port (url-port url)))
       (set (make-local-variable 'magit-gerrit-ssh-creds)
            (format "%s@%s" (url-user url) (url-host url)))
       (message "Detected magit-gerrit-ssh-creds=%s" magit-gerrit-ssh-creds))))
