@@ -1,6 +1,6 @@
 ;;; magit-gerrit.el --- Magit plugin for Gerrit Code Review  -*- lexical-binding: t; -*-
 ;;
-;; Copyright (C) 2013 Brian Fransioli
+;; Copyright (C) 2013-2025 Brian Fransioli
 ;;
 ;; Author: Brian Fransioli <assem@terranpro.org>
 ;; URL: https://github.com/terranpro/magit-gerrit
@@ -807,9 +807,11 @@ default Gerrit SSH port."
 ;; Hack in dir-local variables that might be set for magit gerrit
 (add-hook 'magit-status-mode-hook #'hack-dir-local-variables-non-file-buffer t)
 
-;; Try to auto enable magit-gerrit in the magit-status buffer
-(add-hook 'magit-status-mode-hook #'magit-gerrit-check-enable t)
-(add-hook 'magit-log-mode-hook #'magit-gerrit-check-enable t)
+;;;###autoload
+(defun magit-gerrit-auto-enable ()
+  "Try to auto enable magit-gerrit in the `magit-status' buffer."
+  (add-hook 'magit-status-mode-hook #'magit-gerrit-check-enable t)
+  (add-hook 'magit-log-mode-hook #'magit-gerrit-check-enable t))
 
 (provide 'magit-gerrit)
 
