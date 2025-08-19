@@ -1,6 +1,6 @@
 ;;; magit-gerrit.el --- Magit plugin for Gerrit Code Review  -*- lexical-binding: t; -*-
 ;;
-;; Copyright (C) 2013 Brian Fransioli
+;; Copyright (C) 2013-2025 Brian Fransioli
 ;;
 ;; Author: Brian Fransioli <assem@terranpro.org>
 ;; URL: https://github.com/terranpro/magit-gerrit
@@ -83,6 +83,12 @@
 (defvar-local magit-gerrit-remote "origin"
   "Default remote name to use for gerrit (e.g. \"origin\", \"gerrit\")")
 
+(defvar-local magit-gerrit-force-enable nil
+  "Force enabling `magit-gerrit' for the project.")
+
+(defvar-local magit-gerrit-port 29418
+  "The default port to use with the Gerrit host.")
+
 (defcustom magit-gerrit-use-push-url nil
   "If t use push url from 'git remote' for Gerrit connection."
   :group 'magit-gerrit
@@ -134,7 +140,9 @@ parameter of `magit-insert-section'."
 
 (defun gerrit-command (cmd &rest args)
   (let ((gcmd (concat
-               "-x -p 29418 "
+               "-x -p "
+               (number-to-string magit-gerrit-port)
+               " "
                (or magit-gerrit-ssh-creds
                    (error "`magit-gerrit-ssh-creds' must be set!"))
                " "
@@ -249,34 +257,34 @@ Succeed even if branch already exist
                               10
                               nil ?\s magit-gerrit-ellipsis)))
          ;; lastupdate
-        (lastupdate (propertize (truncate-string-to-width
-                               (format "%s" "Updated")
-                                12
-                                nil ?\s magit-gerrit-ellipsis)))
-        ;; approvals
-        (approvals-info (magit-gerrit-create-review-labels))
+         (lastupdate (propertize (truncate-string-to-width
+                                  (format "%s" "Updated")
+                                  12
+                                  nil ?\s magit-gerrit-ellipsis)))
+         ;; approvals
+         (approvals-info (magit-gerrit-create-review-labels))
 
-        ;; subject
-        (subjstr (propertize
-                  (truncate-string-to-width
-                   (format "%s" "Subject")
-                   (- wid (length (concat numstr author
-                                          (cond
-                                           ((> wid 128) (concat branch sizeinfo lastupdate approvals-info))
-                                           ((> wid 108) (concat sizeinfo lastupdate approvals-info))
-                                           ((> wid 94)  (concat sizeinfo approvals-info))
-                                           ((> wid 80)  (concat approvals-info))
-                                           (t ""))))
-                   1)
-                  nil ?\s magit-gerrit-ellipsis)))
+         ;; subject
+         (subjstr (propertize
+                   (truncate-string-to-width
+                    (format "%s" "Subject")
+                    (- wid (length (concat numstr author
+                                           (cond
+                                            ((> wid 128) (concat branch sizeinfo lastupdate approvals-info))
+                                            ((> wid 108) (concat sizeinfo lastupdate approvals-info))
+                                            ((> wid 94)  (concat sizeinfo approvals-info))
+                                            ((> wid 80)  (concat approvals-info))
+                                            (t ""))))
+                       1)
+                    nil ?\s magit-gerrit-ellipsis)))
 
-        (show-str (concat numstr subjstr author
-                          (cond
-                           ((> wid 128) (concat branch sizeinfo lastupdate approvals-info))
-                           ((> wid 108) (concat sizeinfo lastupdate approvals-info))
-                           ((> wid 94)  (concat sizeinfo approvals-info))
-                           ((> wid 80)  (concat approvals-info))
-                           (t "")))))
+         (show-str (concat numstr subjstr author
+                           (cond
+                            ((> wid 128) (concat branch sizeinfo lastupdate approvals-info))
+                            ((> wid 108) (concat sizeinfo lastupdate approvals-info))
+                            ((> wid 94)  (concat sizeinfo approvals-info))
+                            ((> wid 80)  (concat approvals-info))
+                            (t "")))))
     (propertize (format "%s\n" show-str) 'face 'highlight)))
 
 (defun magit-gerrit-pretty-print-review (num patchsetn subj owner-name br size-i size-d ctime approvals-info &optional draft)
@@ -345,8 +353,8 @@ Succeed even if branch already exist
                             ((> wid 94)  (concat sizeinfo approvals-info))
                             ((> wid 80)  (concat approvals-info))
                             (t "")))))
-    (format "%s\n" show-str)
-    ))
+    (format "%s\n" show-str)))
+
 
 (defun magit-gerrit-match-review-labels (score type)
   "Match SCORE to correct TYPE."
@@ -406,8 +414,8 @@ Succeed even if branch already exist
          (approvs (cdr-safe (if (listp patchsets)
                                 (assoc 'approvals patchsets)
                               (assoc 'approvals (aref patchsets 0)))))
-         (scoreinfo (magit-gerrit-wash-approvals-oneline approvs))
-         )
+         (scoreinfo (magit-gerrit-wash-approvals-oneline approvs)))
+
     (if (and beg end)
         (delete-region beg end))
     (when (and num subj owner-name)
@@ -553,7 +561,7 @@ Succeed even if branch already exist
       (list "")))
 
 (defun magit-gerrit-verify-review (args)
-  "Verify a Gerrit Review"
+  "Verify a Gerrit Review."
   (interactive (magit-gerrit-arguments))
 
   (let ((score (completing-read "Score: "
@@ -688,8 +696,7 @@ Succeed even if branch already exist
   :class 'transient-option
   :key "-m"
   :argument "--message "
-  :reader 'magit-gerrit-read-comment
-  )
+  :reader 'magit-gerrit-read-comment)
 
 (defun magit-gerrit-create-branch (_branch _parent))
 
@@ -757,12 +764,12 @@ Succeed even if branch already exist
     (magit-refresh)))
 
 (defun magit-gerrit-detect-ssh-creds (remote-url)
-  "Derive magit-gerrit-ssh-creds from remote-url.
-Assumes remote-url is a gerrit repo if scheme is ssh
-and port is the default gerrit ssh port."
+  "Derive `magit-gerrit-ssh-creds' from REMOTE-URL.
+Assumes REMOTE-URL is a Gerrit repo if scheme is SSH and port is the
+default Gerrit SSH port."
   (let ((url (url-generic-parse-url remote-url)))
     (when (and (string= "ssh" (url-type url))
-               (eq 29418 (url-port url)))
+               (eq magit-gerrit-port (url-port url)))
       (set (make-local-variable 'magit-gerrit-ssh-creds)
            (format "%s@%s" (url-user url) (url-host url)))
       (message "Detected magit-gerrit-ssh-creds=%s" magit-gerrit-ssh-creds))))
@@ -772,10 +779,11 @@ and port is the default gerrit ssh port."
   (defvar magit-origin-action nil)
   (let ((remote-url (magit-gerrit-get-remote-url)))
     (when (and remote-url
-               (or magit-gerrit-ssh-creds
-                   (magit-gerrit-detect-ssh-creds remote-url))
-               (string-match magit-gerrit-ssh-creds remote-url))
-      (magit-gerrit-mode t))
+               (or magit-gerrit-force-enable
+                   (and (or magit-gerrit-ssh-creds
+                            (magit-gerrit-detect-ssh-creds remote-url))
+                        (string-match magit-gerrit-ssh-creds remote-url))))
+      (magit-gerrit-mode 1))
     (if (not magit-origin-action)
         (setf magit-origin-action
               (lookup-key magit-mode-map magit-gerrit-popup-prefix)))
@@ -799,9 +807,11 @@ and port is the default gerrit ssh port."
 ;; Hack in dir-local variables that might be set for magit gerrit
 (add-hook 'magit-status-mode-hook #'hack-dir-local-variables-non-file-buffer t)
 
-;; Try to auto enable magit-gerrit in the magit-status buffer
-(add-hook 'magit-status-mode-hook #'magit-gerrit-check-enable t)
-(add-hook 'magit-log-mode-hook #'magit-gerrit-check-enable t)
+;;;###autoload
+(defun magit-gerrit-auto-enable ()
+  "Try to auto enable magit-gerrit in the `magit-status' buffer."
+  (add-hook 'magit-status-mode-hook #'magit-gerrit-check-enable t)
+  (add-hook 'magit-log-mode-hook #'magit-gerrit-check-enable t))
 
 (provide 'magit-gerrit)
 
