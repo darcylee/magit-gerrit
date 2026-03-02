@@ -285,40 +285,40 @@ Succeed even if branch already exist
                             ((> wid 94)  (concat sizeinfo approvals-info))
                             ((> wid 80)  (concat approvals-info))
                             (t "")))))
-    (propertize (format "%s\n" show-str) 'face 'highlight)))
+    (propertize (format "%s\n" show-str) 'font-lock-face 'highlight)))
 
 (defun magit-gerrit-pretty-print-review (num patchsetn subj owner-name br size-i size-d ctime approvals-info &optional draft)
   ;; window-width - two prevents long line arrow from being shown
   (let* ((wid (window-width))
          ;; number
-         (numstr (propertize (format "%-8s" num) 'face 'magit-hash))
+         (numstr (propertize (format "%-8s" num) 'font-lock-face 'magit-hash))
          ;; patchset num
          (patchsetstr (propertize (format "%-5s" (format "[%s]" patchsetn))
-                                  'face 'magit-hash))
+                                  'font-lock-face 'magit-hash))
          ;; branch info
          (branch (propertize (truncate-string-to-width
                               br
                               20
                               nil ?\s magit-gerrit-ellipsis)
-                             'face 'magit-hash))
+                             'font-lock-face 'magit-hash))
          ;; sizeinfo
          (sizeinfo (concat (propertize (truncate-string-to-width
                                         (format "%+7s"  (concat "+" (number-to-string size-i)))
                                         7
                                         nil ?\s magit-gerrit-ellipsis)
-                                       'face 'diff-added)
+                                       'font-lock-face 'diff-added)
                            " "
                            (propertize (truncate-string-to-width
                                         (format "-%s" size-d)
                                         7
                                         nil ?\s magit-gerrit-ellipsis)
-                                       'face 'diff-removed)))
+                                       'font-lock-face 'diff-removed)))
          ;; owner
          (author (propertize (truncate-string-to-width
                               (format "%s" owner-name)
                               10
                               nil ?\s magit-gerrit-ellipsis)
-                             'face 'magit-log-author))
+                             'font-lock-face 'magit-log-author))
          ;; lastupdate
          (lastupdate (propertize (truncate-string-to-width
                                   (magit-gerrit-format-short-timestring
@@ -342,7 +342,7 @@ Succeed even if branch already exist
                        (magit-gerrit-string-real-length author)
                        1)
                     nil ?\s magit-gerrit-ellipsis)
-                   'face
+                   'font-lock-face
                    (if draft
                        'magit-dimmed
                      'magit-filename)))
@@ -372,10 +372,10 @@ Succeed even if branch already exist
         (if (string= "Code-Review" type)
             (setq t-max-v 2 t-min-v -2))
         (cond
-         ((<= min-v t-min-v) (propertize "x" 'face 'magit-signature-bad))
-         ((>= max-v t-max-v) (propertize "√" 'face 'magit-signature-good))
-         ((> min-v 0) (propertize (format "+%d" min-v) 'face 'magit-signature-good))
-         (t (propertize (format "%d" min-v) 'face 'magit-signature-bad))))
+         ((<= min-v t-min-v) (propertize "x" 'font-lock-face 'magit-signature-bad))
+         ((>= max-v t-max-v) (propertize "√" 'font-lock-face 'magit-signature-good))
+         ((> min-v 0) (propertize (format "+%d" min-v) 'font-lock-face 'magit-signature-good))
+         (t (propertize (format "%d" min-v) 'font-lock-face 'magit-signature-bad))))
     " "))
 
 (defun magit-gerrit-wash-approvals-oneline (approvals)
