@@ -306,13 +306,13 @@ Succeed even if branch already exist
                                         (format "%+7s"  (concat "+" (number-to-string size-i)))
                                         7
                                         nil ?\s magit-gerrit-ellipsis)
-                                       'font-lock-face 'diff-added)
+                                       'font-lock-face 'magit-diffstat-added)
                            " "
                            (propertize (truncate-string-to-width
                                         (format "-%s" size-d)
                                         7
                                         nil ?\s magit-gerrit-ellipsis)
-                                       'font-lock-face 'diff-removed)))
+                                       'font-lock-face 'magit-diffstat-removed)))
          ;; owner
          (author (propertize (truncate-string-to-width
                               (format "%s" owner-name)
